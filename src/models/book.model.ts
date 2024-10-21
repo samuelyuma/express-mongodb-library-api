@@ -12,6 +12,7 @@ type BookDocument = Document & {
     count: number;
   };
   tags: string[];
+  qty: number;
 };
 
 const bookSchema = new Schema(
@@ -27,6 +28,7 @@ const bookSchema = new Schema(
       count: { type: Number, required: true },
     },
     tags: { type: [String], required: true },
+    qty: { type: Number, required: true },
   },
   { collection: 'books', timestamps: true },
 );

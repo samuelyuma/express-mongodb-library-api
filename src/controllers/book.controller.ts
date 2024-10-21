@@ -4,9 +4,9 @@ import { isValidObjectId } from 'mongoose';
 
 export const addNewBook = async (req: Request, res: Response) => {
   try {
-    const { author, coverImage, description, publishedDate, publisher, rating, tags, title } = req.body;
+    const { author, coverImage, description, publishedDate, publisher, qty, rating, tags, title } = req.body;
 
-    if (!author || !coverImage || !description || !publishedDate || !publisher || !rating || !tags || !title) {
+    if (!author || !coverImage || !description || !publishedDate || !publisher || !rating || !tags || !title || !qty) {
       return res.status(400).json({ status: 'error', message: 'All fields are required' });
     }
 
