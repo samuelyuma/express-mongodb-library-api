@@ -4,14 +4,22 @@ import { isValidObjectId } from 'mongoose';
 
 export const addNewBook = async (req: Request, res: Response) => {
   try {
-    const { author, coverImage, description, publishedDate, publisher, qty, rating, tags, title } = req.body;
+    const { author, coverImage, description, initialQty, publishedDate, publisher, qty, rating, tags, title } = req.body;
 
-    if (!author || !coverImage || !description || !publishedDate || !publisher || !rating || !tags || !title || !qty) {
+    if (!author || !coverImage || !description || !publishedDate || !publisher || !rating || !tags || !title || !qty || !initialQty) {
       return res.status(400).json({ status: 'error', message: 'All fields are required' });
     }
 
     if (!rating.average || !rating.count) {
       return res.status(400).json({ status: 'error', message: 'Rating must include average and count' });
+    }
+
+    if (initialQty <= 0 || qty <= 0) {
+      return res.status(400).json({ status: 'error', message: 'Initial Qty and Qty should not be 0 or less' });
+    }
+
+    if (qty > initialQty) {
+      return res.status(400).json({ status: 'error', message: 'Qty should not be more than Initial Qty' });
     }
 
     const newBook = {
@@ -26,6 +34,8 @@ export const addNewBook = async (req: Request, res: Response) => {
       },
       tags,
       title,
+      initialQty,
+      qty,
     };
 
     const book = await Book.create(newBook);
@@ -90,7 +100,7 @@ export const getBookById = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Error in getBookById:', error);
+    console.error('Error when get book by id:', error);
     return res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -110,8 +120,29 @@ export const modifyBookData = async (req: Request, res: Response) => {
     }
 
     // Logic to update the book data
+    const updatedBook = await Book.findByIdAndUpdate(
+      id,
+      { ...req.body },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!updatedBook) {
+      return res.status(404).json({
+        status: 'error',
+        message: `Book not found`,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Successfully update book',
+      data: updatedBook,
+    });
   } catch (error) {
-    console.error('Error in getBookById:', error);
+    console.error('Error when update book:', error);
     return res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -144,7 +175,7 @@ export const removeBook = async (req: Request, res: Response) => {
       message: 'Successfully remove book',
     });
   } catch (error) {
-    console.error('Error in getBookById:', error);
+    console.error('Error when remove book:', error);
     return res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : 'An unexpected error occurred',
