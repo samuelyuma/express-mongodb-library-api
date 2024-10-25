@@ -32,7 +32,7 @@ const bookSchema = new Schema(
     initialQty: { type: Number, required: true },
     qty: { type: Number, required: true },
   },
-  { collection: 'books', timestamps: true },
+  { collection: 'books', timestamps: true, versionKey: false },
 );
 
 const Book = mongoose.model<BookDocument>('Book', bookSchema);

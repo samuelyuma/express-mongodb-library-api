@@ -100,7 +100,7 @@ export const getBookById = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Error in getBookById:', error);
+    console.error('Error when get book by id:', error);
     return res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -142,7 +142,7 @@ export const modifyBookData = async (req: Request, res: Response) => {
       data: updatedBook,
     });
   } catch (error) {
-    console.error('Error in getBookById:', error);
+    console.error('Error when update book:', error);
     return res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -175,7 +175,7 @@ export const removeBook = async (req: Request, res: Response) => {
       message: 'Successfully remove book',
     });
   } catch (error) {
-    console.error('Error in getBookById:', error);
+    console.error('Error when remove book:', error);
     return res.status(500).json({
       status: 'error',
       message: error instanceof Error ? error.message : 'An unexpected error occurred',
