@@ -1,9 +1,5 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
-import { User } from '../models/user.model';
-
-const secretKey = process.env.SECRET_KEY!;
+import * as authService from '../services/auth.service';
 
 export const register = async (req: Request, res: Response) => {
   const { email, password, username } = req.body;
@@ -16,33 +12,20 @@ export const register = async (req: Request, res: Response) => {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const existingUser = await User.findOne({ username, email });
-
-    if (existingUser) {
-      return res.status(401).json({ status: 'error', message: 'User already registered' });
-    }
-
-    const user = await User.create({
-      email,
-      password: hashedPassword,
-      username,
-    });
+    const userData = await authService.register(email, password, username);
 
     return res.status(201).json({
       status: 'success',
       message: 'User registered successfully',
-      data: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      data: userData,
     });
   } catch (error) {
-    return res.status(500).json({
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const statusCode = errorMessage === 'User already registered' ? 401 : 500;
+
+    return res.status(statusCode).json({
       status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
+      message: errorMessage,
     });
   }
 };
@@ -56,39 +39,22 @@ export const login = async (req: Request, res: Response) => {
       return res.status(422).json({ status: 'failed', message: `${field} is required` });
     }
   }
+
   try {
-    const user = await User.findOne({ username });
-
-    if (!user) {
-      return res.status(401).json({ status: 'error', message: 'User not registered' });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Invalid credentials',
-      });
-    }
-
-    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: '1h' });
+    const loginData = await authService.login(username, password);
 
     return res.status(200).json({
       status: 'success',
       message: 'Login success',
-      data: {
-        user: {
-          username: user.username,
-          email: user.email,
-        },
-        token,
-      },
+      data: loginData,
     });
   } catch (error) {
-    return res.status(500).json({
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const statusCode = errorMessage === 'User not registered' || errorMessage === 'Invalid credentials' ? 401 : 500;
+
+    return res.status(statusCode).json({
       status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
+      message: errorMessage,
     });
   }
 };
