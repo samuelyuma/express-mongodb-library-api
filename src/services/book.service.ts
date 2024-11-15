@@ -46,6 +46,22 @@ export const updateBookData = async (id: string, bookData: Partial<BookDocument>
     throw new Error(`Invalid book id: ${id}`);
   }
 
+  const isBookExist = await Book.findById(id);
+
+  if (!isBookExist) {
+    throw new Error(`Book with id: ${id} not found`);
+  }
+
+  if (bookData.qty) {
+    if (bookData.initialQty && bookData.qty > bookData.initialQty) {
+      throw new Error(`Qty should not be more than Initial Qty`);
+    } else if (bookData.qty > isBookExist.initialQty) {
+      throw new Error(`Qty should not be more than Initial Qty`);
+    }
+  } else if (bookData.initialQty && isBookExist.qty > bookData.initialQty) {
+    throw new Error(`Qty should not be more than Initial Qty`);
+  }
+
   const updatedBook = await Book.findByIdAndUpdate(id, bookData, {
     new: true,
     runValidators: true,
