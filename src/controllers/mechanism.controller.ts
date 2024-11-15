@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as mechanismService from '../services/mechanism.service';
 
-export const borrowBook = async (req: Request, res: Response) => {
+export const borrowBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const currentQty = await mechanismService.borrowBook(req.params.id);
 
@@ -11,16 +11,11 @@ export const borrowBook = async (req: Request, res: Response) => {
       data: { currentQty },
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-
-    return res.status(errorMessage.includes('Invalid book id') ? 400 : 500).json({
-      status: 'error',
-      message: errorMessage,
-    });
+    return next(error);
   }
 };
 
-export const returnBook = async (req: Request, res: Response) => {
+export const returnBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const currentQty = await mechanismService.returnBook(req.params.id);
 
@@ -30,11 +25,6 @@ export const returnBook = async (req: Request, res: Response) => {
       data: { currentQty },
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-
-    return res.status(errorMessage.includes('Invalid book id') ? 400 : 500).json({
-      status: 'error',
-      message: errorMessage,
-    });
+    return next(error);
   }
 };

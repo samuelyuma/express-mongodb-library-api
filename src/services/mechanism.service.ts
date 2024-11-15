@@ -1,19 +1,20 @@
+import { CustomError } from '../middleware/error.middleware';
 import { Book } from '../models/book.model';
 import { isValidObjectId } from 'mongoose';
 
 export const borrowBook = async (id: string) => {
   if (!isValidObjectId(id)) {
-    throw new Error(`Invalid book id: ${id}`);
+    throw new CustomError(400, `Invalid book id: ${id}`);
   }
 
   const book = await Book.findById(id);
 
   if (!book) {
-    throw new Error(`Book with id: ${id} not found`);
+    throw new CustomError(404, `Book with id: ${id} not found`);
   }
 
   if (book.qty === 0) {
-    throw new Error(`Book with id: ${id} has no amount left`);
+    throw new CustomError(400, `Book with id: ${id} has no amount left`);
   }
 
   const updatedBook = await Book.findByIdAndUpdate(
@@ -30,17 +31,17 @@ export const borrowBook = async (id: string) => {
 
 export const returnBook = async (id: string) => {
   if (!isValidObjectId(id)) {
-    throw new Error(`Invalid book id: ${id}`);
+    throw new CustomError(400, `Invalid book id: ${id}`);
   }
 
   const book = await Book.findById(id);
 
   if (!book) {
-    throw new Error(`Book with id: ${id} not found`);
+    throw new CustomError(404, `Book with id: ${id} not found`);
   }
 
   if (book.initialQty === book.qty) {
-    throw new Error(`Book with id: ${id} is already at maximum quantity`);
+    throw new CustomError(400, `Book with id: ${id} is already at maximum quantity`);
   }
 
   const updatedBook = await Book.findByIdAndUpdate(

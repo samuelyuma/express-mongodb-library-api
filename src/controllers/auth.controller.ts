@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as authService from '../services/auth.service';
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password, username } = req.body;
   const requiredFields = { username, email, password };
 
@@ -20,17 +20,11 @@ export const register = async (req: Request, res: Response) => {
       data: userData,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-    const statusCode = errorMessage === 'User already registered' ? 401 : 500;
-
-    return res.status(statusCode).json({
-      status: 'error',
-      message: errorMessage,
-    });
+    return next(error);
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { password, username } = req.body;
   const requiredFields = { username, password };
 
@@ -49,12 +43,6 @@ export const login = async (req: Request, res: Response) => {
       data: loginData,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-    const statusCode = errorMessage === 'User not registered' || errorMessage === 'Invalid credentials' ? 401 : 500;
-
-    return res.status(statusCode).json({
-      status: 'error',
-      message: errorMessage,
-    });
+    return next(error);
   }
 };

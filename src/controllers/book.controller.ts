@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as bookService from '../services/book.service';
 
-export const addNewBook = async (req: Request, res: Response) => {
+export const addNewBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const book = await bookService.addNewBook(req.body);
 
@@ -11,14 +11,11 @@ export const addNewBook = async (req: Request, res: Response) => {
       data: { book },
     });
   } catch (error) {
-    return res.status(400).json({
-      status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
-    });
+    return next(error);
   }
 };
 
-export const getAllBooks = async (_: Request, res: Response) => {
+export const getAllBooks = async (_: Request, res: Response, next: NextFunction) => {
   try {
     const books = await bookService.getAllBooks();
 
@@ -28,14 +25,11 @@ export const getAllBooks = async (_: Request, res: Response) => {
       data: books,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
-    });
+    return next(error);
   }
 };
 
-export const getBookById = async (req: Request, res: Response) => {
+export const getBookById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const book = await bookService.getBookById(req.params.id);
 
@@ -45,14 +39,11 @@ export const getBookById = async (req: Request, res: Response) => {
       data: book,
     });
   } catch (error) {
-    return res.status(400).json({
-      status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
-    });
+    return next(error);
   }
 };
 
-export const modifyBookData = async (req: Request, res: Response) => {
+export const modifyBookData = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updatedBook = await bookService.updateBookData(req.params.id, req.body);
 
@@ -62,14 +53,11 @@ export const modifyBookData = async (req: Request, res: Response) => {
       data: updatedBook,
     });
   } catch (error) {
-    return res.status(400).json({
-      status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
-    });
+    return next(error);
   }
 };
 
-export const removeBook = async (req: Request, res: Response) => {
+export const removeBook = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await bookService.deleteBook(req.params.id);
     return res.status(200).json({
@@ -77,9 +65,6 @@ export const removeBook = async (req: Request, res: Response) => {
       message: 'Successfully remove book',
     });
   } catch (error) {
-    return res.status(400).json({
-      status: 'error',
-      message: error instanceof Error ? error.message : 'An unexpected error occurred',
-    });
+    return next(error);
   }
 };
