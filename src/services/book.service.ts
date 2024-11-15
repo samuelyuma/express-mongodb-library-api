@@ -13,8 +13,8 @@ export const addNewBook = async (bookData: BookDocument) => {
     throw new CustomError(400, 'Rating must include average and count');
   }
 
-  if (initialQty <= 0 || qty <= 0) {
-    throw new CustomError(400, 'Initial Qty and Qty should not be 0 or less');
+  if (initialQty < 0 || qty < 0) {
+    throw new CustomError(400, 'Initial Qty and Qty should not be less than 0');
   }
 
   if (qty > initialQty) {
@@ -51,6 +51,10 @@ export const updateBookData = async (id: string, bookData: Partial<BookDocument>
 
   if (!isBookExist) {
     throw new CustomError(404, `Book with id: ${id} not found`);
+  }
+
+  if ((bookData.qty && bookData.qty < 0) || (bookData.initialQty && bookData.initialQty < 0)) {
+    throw new CustomError(400, 'Qty and Initial Qty should not be less than 0');
   }
 
   if (bookData.qty) {
